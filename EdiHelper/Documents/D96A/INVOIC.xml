@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<segments>
+  <segment tag="UNH">
+    <rows total="2">
+      <row>
+        <value>1</value>
+      </row>
+      <row>
+        <value>INVOIC</value>
+        <cols>
+          <col>
+            <value>D</value>
+          </col>
+          <col>
+            <value>96A</value>
+          </col>
+          <col>
+            <value>UN</value>
+          </col>
+          <col>
+            <value>EAN008</value>
+          </col>
+        </cols>
+      </row>
+    </rows>
+  </segment>
+</segments>

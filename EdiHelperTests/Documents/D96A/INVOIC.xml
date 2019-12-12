@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<segments>
+  <segment tag="UNH">
+    <rows total="2">
+      <row>
+        <col>1</col>
+      </row>
+      <row>
+        <col>INVOIC</col>
+        <col>D</col>
+        <col>96A</col>
+        <col>UN</col>
+        <col>EAN008</col>
+      </row>
+    </rows>
+  </segment>
+  <segmentgroup id="1">
+    <segment tag="TST">
+      <rows>
+        <row>
+          <col>TEST_VALUE</col>
+        </row>
+      </rows>
+    </segment>
+  </segmentgroup>
+  <segment tag="UNB">
+    <rows>
+      <row>
+        <col>UNOC</col>
+      </row>
+    </rows>
+  </segment>
+</segments>
