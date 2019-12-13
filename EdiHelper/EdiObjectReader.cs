@@ -14,7 +14,7 @@ namespace EdiHelper
             _storages = new Dictionary<string, ICollection<ICollection<KeyValuePair<string, string>>>>();
         }
 
-        public void Find(object o)
+        public void Read(object o)
         {
             var ediList = from p in o.GetType().GetProperties().Where(a => a.IsDefined(typeof(EdiAttribute), false))
                           let at = (EdiAttribute)p.GetCustomAttribute(typeof(EdiAttribute))
@@ -56,7 +56,7 @@ namespace EdiHelper
             {
                 var value = ediObjectProperty.GetValue(o);
 
-                Find(value);
+                Read(value);
             }
 
             var ediListProperties = o.GetType().GetProperties().Where(p => p.IsDefined(typeof(EdiListAttribute), false));
@@ -69,7 +69,7 @@ namespace EdiHelper
 
                 foreach (var value in list)
                 {
-                    Find(value);
+                    Read(value);
                 }
             }
         }
@@ -82,7 +82,7 @@ namespace EdiHelper
 
     public interface IEdiObjectReader
     {
-        void Find(object o);
+        void Read(object o);
 
         ICollection<ICollection<KeyValuePair<string, string>>> Get(string tag);
     }
