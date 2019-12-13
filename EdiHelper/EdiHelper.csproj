@@ -41,8 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\EdiAttribute.cs" />
     <Compile Include="EdiDocument.cs" />
     <Compile Include="EdiDocumentBuilder.cs" />
+    <Compile Include="EdiObjectReader.cs" />
     <Compile Include="EdiSegment.cs" />
     <Compile Include="EdiBaseSegment.cs" />
     <Compile Include="EdiSegmentGroup.cs" />
