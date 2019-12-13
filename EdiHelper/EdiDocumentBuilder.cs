@@ -90,7 +90,7 @@ namespace EdiHelper
             var segmentName = queryableAttributes.FirstOrDefault(a => a.Name == "tag")?.Value;
 
             // get node values from object reader and iterate results
-            var nodeValues = _reader.Get(segmentName)?.ToArray() ?? new List<ICollection<KeyValuePair<string, string>>>() {new List<KeyValuePair<string, string>>()}.ToArray();
+            var nodeValues = _reader.Get(segmentName)?.ToArray() ?? new List<ICollection<Tuple<string,string,int?>>>() {new List<Tuple<string, string, int?>>()}.ToArray();
             var nvCount = nodeValues.Length;
             var rowCount = rows.Count();
             var segments = new EdiSegment[nvCount];
@@ -118,7 +118,7 @@ namespace EdiHelper
 
                         if (!string.IsNullOrEmpty(placeholder))
                         {
-                            nodeValue = nvCollection.FirstOrDefault(v => v.Key == placeholder).Value;
+                            nodeValue = nvCollection.FirstOrDefault(v => v.Item1 == placeholder).Value;
                         }
 
                         // get value from placeholder or set default value
