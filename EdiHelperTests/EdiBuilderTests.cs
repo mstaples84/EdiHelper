@@ -13,6 +13,7 @@ namespace EdiHelperTests
         private const string TestxmlWithGroup = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n<segments>\r\n  <segment tag=\"UNH\">\r\n    <rows total=\"2\">\r\n      <row>\r\n        <col>1</col>\r\n      </row>\r\n      <row>\r\n        <col>INVOIC</col>\r\n        <col>D</col>\r\n        <col>96A</col>\r\n        <col>UN</col>\r\n        <col>EAN008</col>\r\n      </row>\r\n    </rows>\r\n  </segment>\r\n  <segmentgroup id=\"1\">\r\n    <segment tag=\"TST\">\r\n      <rows>\r\n        <row>\r\n          <col>TEST_VALUE</col>\r\n        </row>\r\n      </rows>\r\n    </segment>\r\n  </segmentgroup>\r\n  <segment tag=\"UNB\">\r\n    <rows>\r\n      <row>\r\n        <col>UNOC</col>\r\n      </row>\r\n    </rows>\r\n  </segment>\r\n</segments>";
         private const string TestxmlWithPlaceholders = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n<segments>\r\n  <segment tag=\"UNH\">\r\n    <rows total=\"2\">\r\n      <row>\r\n        <col placeholder=\"unhval1\">1</col>\r\n      </row>\r\n      <row>\r\n        <col placeholder=\"unhval2\">INVOIC</col>\r\n        <col>D</col>\r\n        <col>96A</col>\r\n        <col>UN</col>\r\n        <col>EAN008</col>\r\n      </row>\r\n    </rows>\r\n  </segment>\r\n  <segment tag=\"UNB\">\r\n    <rows>\r\n      <row>\r\n        <col>UNOC</col>\r\n      </row>\r\n    </rows>\r\n  </segment>\r\n</segments>";
         private const string TestxmlFullNoGroups = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n<segments>\r\n  <segment tag=\"UNH\">\r\n    <rows total=\"2\">\r\n      <row>\r\n        <col>1</col>\r\n      </row>\r\n      <row>\r\n        <col>INVOIC</col>\r\n        <col>D</col>\r\n        <col>96A</col>\r\n        <col>UN</col>\r\n        <col>EAN008</col>\r\n      </row>\r\n    </rows>\r\n  </segment>\r\n  <segment tag=\"LIN\">\r\n    <rows>\r\n      <row>\r\n        <col placeholder=\"amount\"></col>\r\n      </row>\r\n      <row>\r\n        <col placeholder=\"price\"></col>\r\n      </row>\r\n    </rows>\r\n  </segment>\r\n</segments>";
+        private const string TestxmlFull = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\r\n<segments>\r\n  <segment tag=\"UNH\">\r\n    <rows total=\"2\">\r\n      <row>\r\n        <col>1</col>\r\n      </row>\r\n      <row>\r\n        <col>INVOIC</col>\r\n        <col>D</col>\r\n        <col>96A</col>\r\n        <col>UN</col>\r\n        <col>EAN008</col>\r\n      </row>\r\n    </rows>\r\n  </segment>\r\n  <segmentgroup id=\"1\">\r\n    <segment tag=\"RFF\">\r\n      <rows>\r\n        <row>\r\n          <col placeholder=\"rffph\">RFFPH</col>\r\n        </row>\r\n      </rows>\r\n    </segment>\r\n    <segment tag=\"LIN\">\r\n      <rows>\r\n        <row>\r\n          <col placeholder=\"amount\"></col>\r\n        </row>\r\n        <row>\r\n          <col placeholder=\"price\"></col>\r\n        </row>\r\n      </rows>\r\n    </segment>\r\n  </segmentgroup>\r\n</segments>";
 
         [TestMethod]
         public void ReadXmlDocTest()
@@ -107,7 +108,44 @@ namespace EdiHelperTests
 
             var docString = ediDocument.ToString();
 
-            var compareString = "UNH+1+INVOIC:D:96A:UN:EAN008'\r\nLIN+1+5'\r\nLIN+3+15'\r\n";
+            var compareString = "UNH+1+INVOIC:D:96A:UN:EAN008'\r\nLIN'\r\nLIN'\r\n";
+
+            Assert.AreEqual(compareString, docString);
+        }
+
+        [TestMethod]
+        public void ReadObjectFullTest()
+        {
+            var xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(TestxmlFull);
+
+            if (xmlDoc.DocumentElement == null) return;
+
+            var reader = new EdiObjectReader();
+
+            var docBuilder = new EdiDocumentBuilder(reader);
+            var o = new MockIterable()
+            {
+                UNH = "3",
+                Subs = new List<MockSub>()
+                {
+                    new MockSub()
+                    {
+                        Amount = "1",
+                        Price = "5"
+                    },
+                    new MockSub()
+                    {
+                        Amount = "3",
+                        Price = "15"
+                    }
+                }
+            };
+            var ediDocument = docBuilder.Create(xmlDoc, o);
+
+            var docString = ediDocument.ToString();
+
+            var compareString = "UNH+1+INVOIC:D:96A:UN:EAN008'\r\nRFF+RFFPH'\r\nLIN+1+5'\r\nLIN+3+15'\r\n";
 
             Assert.AreEqual(compareString, docString);
         }
@@ -133,9 +171,9 @@ namespace EdiHelperTests
 
     public class MockSub
     {
-        [Edi(Placeholder = "amount", Tag = "LIN")]
+        [Edi(Group = 1, Placeholder = "amount", Tag = "LIN")]
         public string Amount { get; set; }
-        [Edi(Placeholder = "price", Tag = "LIN")]
+        [Edi(Group = 1, Placeholder = "price", Tag = "LIN")]
         public string Price { get; set; }
     }
 }

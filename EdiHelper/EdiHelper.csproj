@@ -54,9 +54,7 @@
     <Compile Include="Utilities\XmlDocumentUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Documents\D96A\INVOIC.xml">
-      <SubType>Designer</SubType>
-    </Content>
+    <Folder Include="Documents\D96A\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

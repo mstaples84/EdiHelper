@@ -14,14 +14,25 @@
       </row>
     </rows>
   </segment>
-  <segment tag="LIN">
-    <rows>
-      <row>
-        <col placeholder="amount"></col>
-      </row>
-      <row>
-        <col placeholder="price"></col>
-      </row>
-    </rows>
-  </segment>
+  <segmentgroup id="1">
+    <segment tag="RFF">
+      <rows>
+        <row>
+          <col placeholder="rffph">
+            RFFPH
+          </col>
+        </row>
+      </rows>
+    </segment>
+    <segment tag="LIN">
+      <rows>
+        <row>
+          <col placeholder="amount"></col>
+        </row>
+        <row>
+          <col placeholder="price"></col>
+        </row>
+      </rows>
+    </segment>
+  </segmentgroup>
 </segments>

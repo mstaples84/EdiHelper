@@ -35,12 +35,12 @@ namespace EdiHelper
             // get child nodes
             var segmentsChildren = segmentsNodes[0].ChildNodes;
 
-            var docSegments = ReadChildren(segmentsChildren, null);
+            var docSegments = ReadChildren(segmentsChildren, 0);
             
             return new EdiDocument(docSegments);
         }
 
-        private EdiBaseSegment[] ReadChildren(XmlNodeList children, int? groupId)
+        private EdiBaseSegment[] ReadChildren(XmlNodeList children, int groupId)
         {
             var childCount = children.Count;
             var baseSegments = new SortedList<int, EdiBaseSegment>();
@@ -78,7 +78,7 @@ namespace EdiHelper
             return baseSegments.Select(s => s.Value).ToArray(); ;
         }
 
-        private EdiSegment[] ReadSegment(XmlNode segment, int? groupId)
+        private EdiSegment[] ReadSegment(XmlNode segment, int groupId)
         {
             var rows = segment.GetChildNodes("rows")?.SelectMany(rn => rn.GetChildNodes("row")).ToList();
 
