@@ -7,7 +7,7 @@ namespace EdiHelper.Attributes
     {
         public string Tag { get; set; }
         public string Placeholder { get; set; }
-        public int Group { get; set; }
+        public int? Group { get; set; }
     }
 
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
