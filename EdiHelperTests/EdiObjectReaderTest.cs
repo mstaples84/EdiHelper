@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using EdiHelper;
 using EdiHelper.Attributes;
@@ -22,9 +21,9 @@ namespace EdiHelperTests
 
             var innerCollection = output.FirstOrDefault();
 
-            var keyVal = (innerCollection ?? throw new InvalidOperationException()).FirstOrDefault(kv => kv.Key.Equals("Count"));
+            var keyVal = (innerCollection ?? throw new InvalidOperationException()).FirstOrDefault(t => t.Item1.Equals("Count"));
 
-            Assert.AreEqual(keyVal,new KeyValuePair<string, string>("Count","1"));
+            Assert.AreEqual(keyVal,new Tuple<string, string, int?>("Count","1", null));
         }
     }
 
