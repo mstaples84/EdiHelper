@@ -9,10 +9,10 @@ namespace EdiHelper
 {
     public class EdiObjectReader : IEdiObjectReader
     {
-        private Dictionary<string, ICollection<ICollection<Tuple<string,string,int?>>>> _storages;
+        private Dictionary<string, ICollection<ICollection<Tuple<string,string,int>>>> _storages;
         public EdiObjectReader()
         {
-            _storages = new Dictionary<string, ICollection<ICollection<Tuple<string,string,int?>>>>();
+            _storages = new Dictionary<string, ICollection<ICollection<Tuple<string,string,int>>>>();
         }
 
         public void Read(object o)
@@ -21,18 +21,18 @@ namespace EdiHelper
                           let at = (EdiAttribute)p.GetCustomAttribute(typeof(EdiAttribute))
                           select new { Property = p, Attribute = at };
 
-            var innerDict = new Dictionary<string, ICollection<Tuple<string,string,int?>>>();
+            var innerDict = new Dictionary<string, ICollection<Tuple<string,string,int>>>();
 
             var orderedEdiList = ediList.OrderBy(t => t.Attribute.Tag);
 
             foreach (var item in orderedEdiList)
             {
-                var tuple = new Tuple<string, string, int?>(item.Attribute.Placeholder,
+                var tuple = new Tuple<string, string, int>(item.Attribute.Placeholder,
                     item.Property.GetValue(o).ToString(), item.Attribute.Group);
 
                 if (!innerDict.TryGetValue(item.Attribute.Tag, out var innerCollection))
                 {
-                    innerCollection = new List<Tuple<string,string,int?>>();
+                    innerCollection = new List<Tuple<string,string,int>>();
 
                     innerDict.Add(item.Attribute.Tag, innerCollection);
                 }
@@ -44,7 +44,7 @@ namespace EdiHelper
             {
                 if (!_storages.TryGetValue(item.Key, out var outerCollection))
                 {
-                    outerCollection = new List<ICollection<Tuple<string,string,int?>>>();
+                    outerCollection = new List<ICollection<Tuple<string,string,int>>>();
 
                     _storages.Add(item.Key, outerCollection);
                 }
@@ -76,7 +76,7 @@ namespace EdiHelper
             }
         }
 
-        public ICollection<ICollection<Tuple<string, string, int?>>> Get(string tag)
+        public ICollection<ICollection<Tuple<string, string, int>>> Get(string tag)
         {
             return _storages.TryGetValue(tag, out var collection) ? collection : null;
         }
@@ -86,6 +86,6 @@ namespace EdiHelper
     {
         void Read(object o);
 
-        ICollection<ICollection<Tuple<string,string,int?>>> Get(string tag);
+        ICollection<ICollection<Tuple<string,string,int>>> Get(string tag);
     }
 }
