@@ -35,12 +35,12 @@ namespace EdiHelper
             // get child nodes
             var segmentsChildren = segmentsNodes[0].ChildNodes;
 
-            var docSegments = ReadChildren(segmentsChildren);
+            var docSegments = ReadChildren(segmentsChildren, null);
             
             return new EdiDocument(docSegments);
         }
 
-        private EdiBaseSegment[] ReadChildren(XmlNodeList children)
+        private EdiBaseSegment[] ReadChildren(XmlNodeList children, int? groupId)
         {
             var childCount = children.Count;
             var baseSegments = new SortedList<int, EdiBaseSegment>();
@@ -63,7 +63,7 @@ namespace EdiHelper
                         break;
                     case "segment":
                         // create segment
-                        var ediSegment = ReadSegment(child);
+                        var ediSegment = ReadSegment(child, groupId);
                         if (ediSegment == null) continue;
                         foreach (var segment in ediSegment)
                         {
@@ -78,7 +78,7 @@ namespace EdiHelper
             return baseSegments.Select(s => s.Value).ToArray(); ;
         }
 
-        private EdiSegment[] ReadSegment(XmlNode segment)
+        private EdiSegment[] ReadSegment(XmlNode segment, int? groupId)
         {
             var rows = segment.GetChildNodes("rows")?.SelectMany(rn => rn.GetChildNodes("row")).ToList();
 
@@ -118,11 +118,13 @@ namespace EdiHelper
 
                         if (!string.IsNullOrEmpty(placeholder))
                         {
-                            nodeValue = nvCollection.FirstOrDefault(v => v.Item1 == placeholder).Value;
+                            nodeValue = nvCollection.FirstOrDefault(v => v.Item1 == placeholder && v.Item3 == groupId)?.Item2;
                         }
 
                         // get value from placeholder or set default value
-                        nodeValue = nodeValue ?? cols[c].FirstChild.Value;
+                        nodeValue = nodeValue ?? cols[c].FirstChild?.Value;
+
+                        if (string.IsNullOrEmpty(nodeValue)) continue;
 
                         Trace.WriteLine(nodeValue);
                         colList.Add(nodeValue);
@@ -147,7 +149,7 @@ namespace EdiHelper
             if (!int.TryParse(groupString, out var groupInt)) throw new Exception($"Invalid group id attribute at {node.Name}");
             
             // get children (recursive)
-            var children = ReadChildren(node.ChildNodes);
+            var children = ReadChildren(node.ChildNodes, groupInt);
 
             // create group entity
             var ediGroup = new EdiSegmentGroup(groupInt, children);
