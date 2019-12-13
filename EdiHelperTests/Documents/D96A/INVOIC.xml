@@ -14,19 +14,13 @@
       </row>
     </rows>
   </segment>
-  <segmentgroup id="1">
-    <segment tag="TST">
-      <rows>
-        <row>
-          <col>TEST_VALUE</col>
-        </row>
-      </rows>
-    </segment>
-  </segmentgroup>
-  <segment tag="UNB">
+  <segment tag="LIN">
     <rows>
       <row>
-        <col>UNOC</col>
+        <col placeholder="amount"></col>
+      </row>
+      <row>
+        <col placeholder="price"></col>
       </row>
     </rows>
   </segment>

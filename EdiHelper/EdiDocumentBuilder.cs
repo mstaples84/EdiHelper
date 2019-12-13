@@ -122,7 +122,9 @@ namespace EdiHelper
                         }
 
                         // get value from placeholder or set default value
-                        nodeValue = nodeValue ?? cols[c].FirstChild.Value;
+                        nodeValue = nodeValue ?? cols[c].FirstChild?.Value;
+
+                        if (string.IsNullOrEmpty(nodeValue)) continue;
 
                         Trace.WriteLine(nodeValue);
                         colList.Add(nodeValue);
