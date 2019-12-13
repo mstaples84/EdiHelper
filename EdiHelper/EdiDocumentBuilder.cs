@@ -9,9 +9,25 @@ namespace EdiHelper
 {
     public class EdiDocumentBuilder
     {
-        public EdiDocument Create(XmlDocument xmlDoc) // todo add object mapper using DI
+        private readonly IEdiObjectReader _reader;
+
+        public EdiDocumentBuilder(IEdiObjectReader reader)
+        {
+            _reader = reader;
+        }
+
+        /// <summary>
+        /// Creates a EdiDocument from the object
+        /// </summary>
+        /// <param name="xmlDoc"></param>
+        /// <param name="o">Object with EdiAttribute tags to read values from</param>
+        /// <returns></returns>
+        public EdiDocument Create(XmlDocument xmlDoc, object o)
         {
             if (xmlDoc.DocumentElement == null) return null;
+            if (o == null) return null;
+
+            _reader.Read(o);
 
             var segmentsNodes = xmlDoc.GetElementsByTagName("segments");
             if (segmentsNodes.Count != 1) return null;
@@ -27,7 +43,9 @@ namespace EdiHelper
         private EdiBaseSegment[] ReadChildren(XmlNodeList children)
         {
             var childCount = children.Count;
-            var baseSegments = new EdiBaseSegment[childCount];
+            var baseSegments = new SortedList<int, EdiBaseSegment>();
+            var pos = 0;
+            //var baseSegments = new EdiBaseSegment[childCount];
 
             for (int i = 0; i < childCount; i++)
             {
@@ -39,21 +57,28 @@ namespace EdiHelper
                         // segments and sub segments build themself recursively
                         var ediSegmentGroup = ReadGroup(child);
                         if (ediSegmentGroup == null) continue;
-                        baseSegments[i] = ediSegmentGroup;
+                        baseSegments.Add(pos, ediSegmentGroup);
+                        pos++;
+                        //baseSegments[i] = ediSegmentGroup;
                         break;
                     case "segment":
                         // create segment
                         var ediSegment = ReadSegment(child);
                         if (ediSegment == null) continue;
-                        baseSegments[i] = ediSegment;
+                        foreach (var segment in ediSegment)
+                        {
+                            baseSegments.Add(pos, segment);
+                            pos++;
+                        }
+                        //baseSegments[i] = ediSegment;
                         break;
                 }
             }
 
-            return baseSegments;
+            return baseSegments.Select(s => s.Value).ToArray(); ;
         }
 
-        private EdiSegment ReadSegment(XmlNode segment)
+        private EdiSegment[] ReadSegment(XmlNode segment)
         {
             var rows = segment.GetChildNodes("rows")?.SelectMany(rn => rn.GetChildNodes("row")).ToList();
 
@@ -64,37 +89,53 @@ namespace EdiHelper
 
             var segmentName = queryableAttributes.FirstOrDefault(a => a.Name == "tag")?.Value;
 
-            // todo get node values from object reader and iterate results
-
+            // get node values from object reader and iterate results
+            var nodeValues = _reader.Get(segmentName)?.ToArray() ?? new List<ICollection<KeyValuePair<string, string>>>() {new List<KeyValuePair<string, string>>()}.ToArray();
+            var nvCount = nodeValues.Length;
             var rowCount = rows.Count();
+            var segments = new EdiSegment[nvCount];
 
-            // create new EdiSegment
-            var ediSegment = new EdiSegment(segmentName, rowCount, new EdiUnaConfiguration());
-
-            for (int r = 0; r < rowCount; r++)
+            for (var nv = 0; nv < nvCount; nv++)
             {
-                var cols = rows[r].GetChildNodes("col").ToList();
-                var colCount = cols.Count;
+                var nvCollection = nodeValues[nv];
 
-                var colList = new List<string>();
+                // create new EdiSegment
+                var ediSegment = new EdiSegment(segmentName, rowCount, new EdiUnaConfiguration());
 
-                for (int c = 0; c < colCount; c++)
+                for (int r = 0; r < rowCount; r++)
                 {
-                    var placeholder = cols[c].Attributes?.Cast<XmlAttribute>().AsQueryable()
-                        .FirstOrDefault(ca => ca.Name == "placeholder")?.Value;
+                    var cols = rows[r].GetChildNodes("col").ToList();
+                    var colCount = cols.Count;
 
-                    // todo get value from placeholder or set default value
+                    var colList = new List<string>();
 
-                    var value = cols[c].FirstChild.Value;
-                    Trace.WriteLine(value);
-                    colList.Add(value);
+                    for (int c = 0; c < colCount; c++)
+                    {
+                        var placeholder = cols[c].Attributes?.Cast<XmlAttribute>().AsQueryable()
+                            .FirstOrDefault(ca => ca.Name == "placeholder")?.Value;
+
+                        string nodeValue = null;
+
+                        if (!string.IsNullOrEmpty(placeholder))
+                        {
+                            nodeValue = nvCollection.FirstOrDefault(v => v.Key == placeholder).Value;
+                        }
+
+                        // get value from placeholder or set default value
+                        nodeValue = nodeValue ?? cols[c].FirstChild.Value;
+
+                        Trace.WriteLine(nodeValue);
+                        colList.Add(nodeValue);
+                    }
+
+                    if (colList.Count > 0)
+                        ediSegment.Add(colList.ToArray());
                 }
 
-                if (colList.Count > 0)
-                    ediSegment.Add(colList.ToArray());
+                segments[nv] = ediSegment;
             }
 
-            return ediSegment;
+            return segments;
         }
 
         private EdiSegmentGroup ReadGroup(XmlNode node)
