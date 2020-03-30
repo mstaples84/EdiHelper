@@ -90,47 +90,43 @@ namespace EdiHelper
             // get node values from object reader and iterate results
             //var nodeValues = _reader.Get(segmentName)?.ToArray() ?? new List<ICollection<Tuple<string,string,int>>>() {new List<Tuple<string, string, int>>()}.ToArray();
             var oValues = group.Where(g => g.Item1 == segmentName).ToList();
-            var nvCount = oValues.Count;
-            if (!oValues.Any()) return null;
+            var ovCount = oValues.Count;
+            if (ovCount == 0) return null;
 
             var rowCount = rows.Count();
-            var segments = new EdiSegment[nvCount];
+            var segments = new EdiSegment[ovCount];
 
-            for (var ov = 0; ov < nvCount; ov++)
-            {
-                var oValue = oValues[ov];
+            for (int r = 0; r < rowCount; r++) {
+                var cols = rows[r].GetChildNodes("col").ToList();
+                var colCount = cols.Count;
+
+                var colList = new List<string>();
 
                 var ediSegment = new EdiSegment(segmentName, rowCount, new EdiUnaConfiguration());
 
-                for (int r = 0; r < rowCount; r++) {
-                    var cols = rows[r].GetChildNodes("col").ToList();
-                    var colCount = cols.Count;
+                for (int c = 0; c < colCount; c++) {
+                    var placeholder = cols[c].Attributes?.Cast<XmlAttribute>().AsQueryable()
+                        .FirstOrDefault(ca => ca.Name == "placeholder")?.Value;
 
-                    var colList = new List<string>();
+                    string nodeValue = null;
 
-                    for (int c = 0; c < colCount; c++) {
-                        var placeholder = cols[c].Attributes?.Cast<XmlAttribute>().AsQueryable()
-                            .FirstOrDefault(ca => ca.Name == "placeholder")?.Value;
+                    if (!string.IsNullOrEmpty(placeholder)) {
+                        nodeValue = oValues.FirstOrDefault(nv => nv.Item2 == placeholder)?.Item3;
+                        //nodeValue = nvCollection.FirstOrDefault(v => v.Item1 == placeholder && v.Item3 == groupId)?.Item2;
 
-                        string nodeValue = null;
-
-                        if (!string.IsNullOrEmpty(placeholder)) {
-                            nodeValue = oValues.FirstOrDefault(nv => nv.Item2 == placeholder)?.Item3;
-                            //nodeValue = nvCollection.FirstOrDefault(v => v.Item1 == placeholder && v.Item3 == groupId)?.Item2;
-                        }
-
-                        // get value from placeholder or set default value
-                        nodeValue = nodeValue ?? cols[c].FirstChild?.Value;
-
-                        if (string.IsNullOrEmpty(nodeValue)) continue;
-
-                        Trace.WriteLine(nodeValue);
-                        colList.Add(nodeValue);
                     }
 
-                    if (colList.Count > 0)
-                        ediSegment.Add(colList.ToArray());
+                    // get value from placeholder or set default value
+                    nodeValue = nodeValue ?? cols[c].FirstChild?.Value;
+
+                    if (string.IsNullOrEmpty(nodeValue)) continue;
+
+                    Trace.WriteLine(nodeValue);
+                    colList.Add(nodeValue);
                 }
+
+                if (colList.Count > 0)
+                    ediSegment.Add(colList.ToArray());
             }
             
             //var nvCount = nodeValues.Length;
@@ -192,13 +188,15 @@ namespace EdiHelper
 
             var segmentGroup = _reader.GetSegmentGroup(groupInt);
 
-            EdiBaseSegment[] children;
+            EdiBaseSegment[] children = null;
 
             foreach (var group in segmentGroup)
             {
                 // get children (recursive)
-                children = ReadChildren(node.ChildNodes, groupInt);
+                children = ReadChildren(node.ChildNodes, group);
             }
+
+            if (children == null) return null;
 
             // create group entity
             var ediGroup = new EdiSegmentGroup(groupInt, children);

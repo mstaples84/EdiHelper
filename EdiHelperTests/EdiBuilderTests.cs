@@ -68,11 +68,16 @@ namespace EdiHelperTests
             appInv.Positions.Add(pos1);
             appInv.Positions.Add(pos2);
 
-            var reader = new EdiObjectReader();
-            var docBuilder = new EdiDocumentBuilder(reader);
-            var ediDocument = docBuilder.Create(xmlDoc, appInv);
+            //var reader = new EdiObjectReader();
+            //var docBuilder = new EdiDocumentBuilder(reader);
 
+            var reader = new EdiObjectReader2();
+            var docBuilder = new EdiDocumentBuilder2(reader);
+            var ediDocument = docBuilder.Create(xmlDoc, appInv);
+            
             var docString = ediDocument.ToString();
+
+            File.WriteAllText("ediTest.txt", docString);
         }
 
         public class ApplicationInvoice {
