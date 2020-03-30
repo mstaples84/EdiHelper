@@ -14,5 +14,8 @@ namespace EdiHelper.Attributes
     public class EdiObjectAttribute : Attribute { }
 
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-    public class EdiListAttribute : Attribute { }
+    public class EdiListAttribute : Attribute
+    {
+        public int Group { get; set; } = 0;
+    }
 }

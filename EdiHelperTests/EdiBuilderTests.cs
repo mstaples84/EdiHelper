@@ -90,7 +90,7 @@ namespace EdiHelperTests
             public string ApplicationAccountingNumber { get; set; }
 
             public string ApplicationIdentifier { get; set; }
-            
+
 
             #region ApplicationInvoice
             [Edi(Tag = "UNB", Placeholder = "InvoiceCreateDate")]
@@ -104,7 +104,7 @@ namespace EdiHelperTests
             [Edi(Tag = "BGM", Placeholder = "InvoiceNumber")]
             public string InvoiceNumber2 { get; set; }
 
-            [EdiList]
+            [EdiList(Group = 25)]
             public List<ApplicationInvoicePosition> Positions { get; }
 
             public ApplicationInvoice() {
