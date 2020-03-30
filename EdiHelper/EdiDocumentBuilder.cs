@@ -59,7 +59,6 @@ namespace EdiHelper
                         if (ediSegmentGroup == null) continue;
                         baseSegments.Add(pos, ediSegmentGroup);
                         pos++;
-                        //baseSegments[i] = ediSegmentGroup;
                         break;
                     case "segment":
                         // create segment
@@ -70,7 +69,6 @@ namespace EdiHelper
                             baseSegments.Add(pos, segment);
                             pos++;
                         }
-                        //baseSegments[i] = ediSegment;
                         break;
                 }
             }
