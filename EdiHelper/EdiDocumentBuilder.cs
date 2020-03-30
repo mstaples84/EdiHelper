@@ -73,7 +73,7 @@ namespace EdiHelper
                 }
             }
 
-            return baseSegments.Select(s => s.Value).ToArray(); ;
+            return baseSegments.Select(s => s.Value).ToArray();
         }
 
         private EdiSegment[] ReadSegment(XmlNode segment, int groupId)

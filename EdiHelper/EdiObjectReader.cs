@@ -28,7 +28,7 @@ namespace EdiHelper
             foreach (var item in orderedEdiList)
             {
                 var tuple = new Tuple<string, string, int>(item.Attribute.Placeholder,
-                    item.Property.GetValue(o).ToString(), item.Attribute.Group);
+                    item.Property.GetValue(o)?.ToString(), item.Attribute.Group);
 
                 if (!innerDict.TryGetValue(item.Attribute.Tag, out var innerCollection))
                 {
