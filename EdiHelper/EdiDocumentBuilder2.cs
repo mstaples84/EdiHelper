@@ -89,45 +89,50 @@ namespace EdiHelper
             
             // get node values from object reader and iterate results
             //var nodeValues = _reader.Get(segmentName)?.ToArray() ?? new List<ICollection<Tuple<string,string,int>>>() {new List<Tuple<string, string, int>>()}.ToArray();
-            var nodeValues = group.Where(g => g.Item1 == segmentName).ToList();
-            if (!nodeValues.Any()) return null;
+            var oValues = group.Where(g => g.Item1 == segmentName).ToList();
+            var nvCount = oValues.Count;
+            if (!oValues.Any()) return null;
 
             var rowCount = rows.Count();
-            var segments = new EdiSegment[nodeValues.Count];
+            var segments = new EdiSegment[nvCount];
 
-            for (int r = 0; r < rowCount; r++)
+            for (var ov = 0; ov < nvCount; ov++)
             {
-                var cols = rows[r].GetChildNodes("col").ToList();
-                var colCount = cols.Count;
+                var oValue = oValues[ov];
 
-                var colList = new List<string>();
+                var ediSegment = new EdiSegment(segmentName, rowCount, new EdiUnaConfiguration());
 
-                for (int c = 0; c < colCount; c++)
-                {
-                    var placeholder = cols[c].Attributes?.Cast<XmlAttribute>().AsQueryable()
-                        .FirstOrDefault(ca => ca.Name == "placeholder")?.Value;
+                for (int r = 0; r < rowCount; r++) {
+                    var cols = rows[r].GetChildNodes("col").ToList();
+                    var colCount = cols.Count;
 
-                    string nodeValue = null;
+                    var colList = new List<string>();
 
-                    if (!string.IsNullOrEmpty(placeholder))
-                    {
-                        nodeValue = nodeValues.FirstOrDefault(nv => nv.Item2 == placeholder)?.Item3;
-                        //nodeValue = nvCollection.FirstOrDefault(v => v.Item1 == placeholder && v.Item3 == groupId)?.Item2;
+                    for (int c = 0; c < colCount; c++) {
+                        var placeholder = cols[c].Attributes?.Cast<XmlAttribute>().AsQueryable()
+                            .FirstOrDefault(ca => ca.Name == "placeholder")?.Value;
+
+                        string nodeValue = null;
+
+                        if (!string.IsNullOrEmpty(placeholder)) {
+                            nodeValue = oValues.FirstOrDefault(nv => nv.Item2 == placeholder)?.Item3;
+                            //nodeValue = nvCollection.FirstOrDefault(v => v.Item1 == placeholder && v.Item3 == groupId)?.Item2;
+                        }
+
+                        // get value from placeholder or set default value
+                        nodeValue = nodeValue ?? cols[c].FirstChild?.Value;
+
+                        if (string.IsNullOrEmpty(nodeValue)) continue;
+
+                        Trace.WriteLine(nodeValue);
+                        colList.Add(nodeValue);
                     }
 
-                    // get value from placeholder or set default value
-                    nodeValue = nodeValue ?? cols[c].FirstChild?.Value;
-
-                    if (string.IsNullOrEmpty(nodeValue)) continue;
-
-                    Trace.WriteLine(nodeValue);
-                    colList.Add(nodeValue);
+                    if (colList.Count > 0)
+                        ediSegment.Add(colList.ToArray());
                 }
-
-                if (colList.Count > 0)
-                    ediSegment.Add(colList.ToArray());
             }
-
+            
             //var nvCount = nodeValues.Length;
             //var segments = new EdiSegment[nvCount];
             //var rowCount = rows.Count();
