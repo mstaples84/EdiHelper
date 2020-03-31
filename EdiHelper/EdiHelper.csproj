@@ -43,10 +43,10 @@
   <ItemGroup>
     <Compile Include="Attributes\EdiAttribute.cs" />
     <Compile Include="EdiDocument.cs" />
-    <Compile Include="EdiDocumentBuilder2.cs" />
     <Compile Include="EdiDocumentBuilder.cs" />
+    <Compile Include="EdiDocumentBuilderDeprecated.cs" />
+    <Compile Include="EdiObjectReaderDeprecated.cs" />
     <Compile Include="EdiObjectReader.cs" />
-    <Compile Include="EdiObjectReader2.cs" />
     <Compile Include="EdiSegment.cs" />
     <Compile Include="EdiBaseSegment.cs" />
     <Compile Include="EdiSegmentGroup.cs" />

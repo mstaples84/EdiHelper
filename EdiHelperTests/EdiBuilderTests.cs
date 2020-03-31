@@ -71,8 +71,8 @@ namespace EdiHelperTests
             //var reader = new EdiObjectReader();
             //var docBuilder = new EdiDocumentBuilder(reader);
 
-            var reader = new EdiObjectReader2();
-            var docBuilder = new EdiDocumentBuilder2(reader);
+            var reader = new EdiObjectReader();
+            var docBuilder = new EdiDocumentBuilder(reader);
             var ediDocument = docBuilder.Create(xmlDoc, appInv);
             
             var docString = ediDocument.ToString();
@@ -179,9 +179,9 @@ namespace EdiHelperTests
             
             if (xmlDoc.DocumentElement == null) return;
 
-            var reader = new EdiObjectReader();
+            var reader = new EdiObjectReaderDeprecated();
 
-            var docBuilder = new EdiDocumentBuilder(reader);
+            var docBuilder = new EdiDocumentBuilderDeprecated(reader);
             var ediDocument = docBuilder.Create(xmlDoc, new object());
 
             var docString = ediDocument.ToString();
@@ -199,9 +199,9 @@ namespace EdiHelperTests
 
             if (xmlDoc.DocumentElement == null) return;
 
-            var reader = new EdiObjectReader();
+            var reader = new EdiObjectReaderDeprecated();
 
-            var docBuilder = new EdiDocumentBuilder(reader);
+            var docBuilder = new EdiDocumentBuilderDeprecated(reader);
             var ediDocument = docBuilder.Create(xmlDoc, new object());
 
             var docString = ediDocument.ToString();
@@ -219,9 +219,9 @@ namespace EdiHelperTests
 
             if (xmlDoc.DocumentElement == null) return;
 
-            var reader = new EdiObjectReader();
+            var reader = new EdiObjectReaderDeprecated();
 
-            var docBuilder = new EdiDocumentBuilder(reader);
+            var docBuilder = new EdiDocumentBuilderDeprecated(reader);
             var o = new MockUpObject() { UNH = "3", SomeValue = "TESTVAL"};
             var ediDocument = docBuilder.Create(xmlDoc, o);
 
@@ -240,9 +240,9 @@ namespace EdiHelperTests
 
             if (xmlDoc.DocumentElement == null) return;
 
-            var reader = new EdiObjectReader();
+            var reader = new EdiObjectReaderDeprecated();
 
-            var docBuilder = new EdiDocumentBuilder(reader);
+            var docBuilder = new EdiDocumentBuilderDeprecated(reader);
             var o = new MockIterable()
             {
                 UNH = "3",
@@ -277,9 +277,9 @@ namespace EdiHelperTests
 
             if (xmlDoc.DocumentElement == null) return;
 
-            var reader = new EdiObjectReader();
+            var reader = new EdiObjectReaderDeprecated();
 
-            var docBuilder = new EdiDocumentBuilder(reader);
+            var docBuilder = new EdiDocumentBuilderDeprecated(reader);
             var o = new MockIterable()
             {
                 UNH = "3",

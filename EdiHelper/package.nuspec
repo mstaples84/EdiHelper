@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <!--*-->
+    <id>EdiHelper</id>
+    <!--*-->
+    <version>1.0.7395.16585</version>
+    <title>EdiHelper</title>
+    <!--*-->
+    <authors>beCoding SoMa GmbH</authors>
+    <owners>beCoding SoMa GmbH</owners>
+    <!--
+    <licenseUrl></licenseUrl>
+    <projectUrl></projectUrl>
+    <iconUrl></iconUrl>
+-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <!--*-->
+    <description>Helper for generating EDIFACT Files</description>
+    <!--*-->
+    <releaseNotes>Fixed some Bugs</releaseNotes>
+    <copyright>Copyright ©  2019</copyright>
+    <tags>
+    </tags>
+    <dependencies>
+      <!--
+      <dependency id="SampleDependency" version="1.0" />
+-->
+    </dependencies>
+  </metadata>
+</package>

@@ -35,12 +35,12 @@ namespace EdiHelper
             // get child nodes
             var segmentsChildren = segmentsNodes[0].ChildNodes;
 
-            var docSegments = ReadChildren(segmentsChildren, 0);
+            var docSegments = ReadChildren(segmentsChildren);
             
             return new EdiDocument(docSegments);
         }
 
-        private EdiBaseSegment[] ReadChildren(XmlNodeList children, int groupId)
+        private EdiBaseSegment[] ReadChildren(XmlNodeList children, ICollection<Tuple<string, string, string>> group = null)
         {
             var childCount = children.Count;
             var baseSegments = new SortedList<int, EdiBaseSegment>();
@@ -62,13 +62,14 @@ namespace EdiHelper
                         break;
                     case "segment":
                         // create segment
-                        var ediSegment = ReadSegment(child, groupId);
+                        if (group == null) group = _reader.GetSegmentGroup(0)?.First();
+                        var ediSegment = ReadSegment(child, group);
                         if (ediSegment == null) continue;
-                        foreach (var segment in ediSegment)
-                        {
-                            baseSegments.Add(pos, segment);
-                            pos++;
-                        }
+                        //foreach (var segment in ediSegment)
+                        //{
+                        baseSegments.Add(pos, ediSegment);
+                        pos++;
+                        //}
                         break;
                 }
             }
@@ -76,7 +77,7 @@ namespace EdiHelper
             return baseSegments.Select(s => s.Value).ToArray();
         }
 
-        private EdiSegment[] ReadSegment(XmlNode segment, int groupId)
+        private EdiSegment ReadSegment(XmlNode segment, ICollection<Tuple<string, string, string>> group)
         {
             var rows = segment.GetChildNodes("rows")?.SelectMany(rn => rn.GetChildNodes("row")).ToList();
 
@@ -86,56 +87,47 @@ namespace EdiHelper
                                       ?? new EnumerableQuery<XmlAttribute>(new List<XmlAttribute>());
 
             var segmentName = queryableAttributes.FirstOrDefault(a => a.Name == "tag")?.Value;
-
+            
             // get node values from object reader and iterate results
-            var nodeValues = _reader.Get(segmentName)?.ToArray() ?? new List<ICollection<Tuple<string,string,int>>>() {new List<Tuple<string, string, int>>()}.ToArray();
-            var nvCount = nodeValues.Length;
+            //var nodeValues = _reader.Get(segmentName)?.ToArray() ?? new List<ICollection<Tuple<string,string,int>>>() {new List<Tuple<string, string, int>>()}.ToArray();
+            var oValues = group?.Where(g => g.Item1 == segmentName).ToList() ?? new List<Tuple<string, string, string>>();
+
             var rowCount = rows.Count();
-            var segments = new EdiSegment[nvCount];
 
-            for (var nv = 0; nv < nvCount; nv++)
-            {
-                var nvCollection = nodeValues[nv];
+            var ediSegment = new EdiSegment(segmentName, rowCount, new EdiUnaConfiguration());
 
-                // create new EdiSegment
-                var ediSegment = new EdiSegment(segmentName, rowCount, new EdiUnaConfiguration());
+            for (int r = 0; r < rowCount; r++) {
+                var cols = rows[r].GetChildNodes("col").ToList();
+                var colCount = cols.Count;
 
-                for (int r = 0; r < rowCount; r++)
-                {
-                    var cols = rows[r].GetChildNodes("col").ToList();
-                    var colCount = cols.Count;
+                var colList = new List<string>();
 
-                    var colList = new List<string>();
+                for (int c = 0; c < colCount; c++) {
+                    var placeholder = cols[c].Attributes?.Cast<XmlAttribute>().AsQueryable()
+                        .FirstOrDefault(ca => ca.Name == "placeholder")?.Value;
 
-                    for (int c = 0; c < colCount; c++)
-                    {
-                        var placeholder = cols[c].Attributes?.Cast<XmlAttribute>().AsQueryable()
-                            .FirstOrDefault(ca => ca.Name == "placeholder")?.Value;
+                    string nodeValue = null;
 
-                        string nodeValue = null;
+                    if (!string.IsNullOrEmpty(placeholder)) {
+                        nodeValue = oValues.FirstOrDefault(nv => nv.Item2 == placeholder)?.Item3;
+                        //nodeValue = nvCollection.FirstOrDefault(v => v.Item1 == placeholder && v.Item3 == groupId)?.Item2;
 
-                        if (!string.IsNullOrEmpty(placeholder))
-                        {
-                            nodeValue = nvCollection.FirstOrDefault(v => v.Item1 == placeholder && v.Item3 == groupId)?.Item2;
-                        }
-
-                        // get value from placeholder or set default value
-                        nodeValue = nodeValue ?? cols[c].FirstChild?.Value;
-
-                        if (string.IsNullOrEmpty(nodeValue)) continue;
-
-                        Trace.WriteLine(nodeValue);
-                        colList.Add(nodeValue);
                     }
 
-                    if (colList.Count > 0)
-                        ediSegment.Add(colList.ToArray());
+                    // get value from placeholder or set default value
+                    nodeValue = nodeValue ?? cols[c].FirstChild?.Value;
+
+                    if (string.IsNullOrEmpty(nodeValue)) continue;
+
+                    Trace.WriteLine(nodeValue);
+                    colList.Add(nodeValue);
                 }
 
-                segments[nv] = ediSegment;
+                if (colList.Count > 0)
+                    ediSegment.Add(colList.ToArray());
             }
 
-            return segments;
+            return ediSegment;
         }
 
         private EdiSegmentGroup ReadGroup(XmlNode node)
@@ -145,9 +137,30 @@ namespace EdiHelper
 
             var groupString = attributes.FirstOrDefault(a => a.Name == "id")?.Value;
             if (!int.TryParse(groupString, out var groupInt)) throw new Exception($"Invalid group id attribute at {node.Name}");
+
+            var segmentGroup = _reader.GetSegmentGroup(groupInt);
             
-            // get children (recursive)
-            var children = ReadChildren(node.ChildNodes, groupInt);
+            EdiBaseSegment[] children = null;
+
+            if (segmentGroup == null)
+            {
+                children = ReadChildren(node.ChildNodes);
+            }
+            else
+            {
+                var childrenList = new SortedList<int, EdiBaseSegment[]>();
+
+                for (var i = 0; i < segmentGroup.Length; i++)
+                {
+                    // get children (recursive)
+                    children = ReadChildren(node.ChildNodes, segmentGroup[i]);
+                    childrenList.Add(i, children);
+                }
+
+                children = childrenList.SelectMany(c => c.Value).ToArray();
+            }
+            
+            if (children == null) return null;
 
             // create group entity
             var ediGroup = new EdiSegmentGroup(groupInt, children);

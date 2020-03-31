@@ -47,7 +47,7 @@ namespace EdiHelperTests
             appInv.Positions.Add(pos1);
             appInv.Positions.Add(pos2);
 
-            var reader = new EdiObjectReader2();
+            var reader = new EdiObjectReader();
             reader.Read(appInv);
 
             var result = reader.GetSegmentGroup(25);
@@ -59,7 +59,7 @@ namespace EdiHelperTests
         {
             var li = new LineItem {ItemNumber = "123456789521245", ItemNumberType = "EAN", PositionCount = 1};
             
-            IEdiObjectReader objReader = new EdiObjectReader();
+            IEdiObjectReaderDeprecated objReader = new EdiObjectReaderDeprecated();
             objReader.Read(li);
 
             var output = objReader.Get("LIN");
