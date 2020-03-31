@@ -128,54 +128,6 @@ namespace EdiHelper
             }
 
             return ediSegment;
-            
-            //var nvCount = nodeValues.Length;
-            //var segments = new EdiSegment[nvCount];
-            //var rowCount = rows.Count();
-
-            //for (var nv = 0; nv < nvCount; nv++)
-            //{
-            //    var nvCollection = nodeValues[nv];
-
-            //    // create new EdiSegment
-            //    var ediSegment = new EdiSegment(segmentName, rowCount, new EdiUnaConfiguration());
-
-            //    for (int r = 0; r < rowCount; r++)
-            //    {
-            //        var cols = rows[r].GetChildNodes("col").ToList();
-            //        var colCount = cols.Count;
-
-            //        var colList = new List<string>();
-
-            //        for (int c = 0; c < colCount; c++)
-            //        {
-            //            var placeholder = cols[c].Attributes?.Cast<XmlAttribute>().AsQueryable()
-            //                .FirstOrDefault(ca => ca.Name == "placeholder")?.Value;
-
-            //            string nodeValue = null;
-
-            //            if (!string.IsNullOrEmpty(placeholder))
-            //            {
-            //                nodeValue = nvCollection.FirstOrDefault(v => v.Item1 == placeholder && v.Item3 == groupId)?.Item2;
-            //            }
-
-            //            // get value from placeholder or set default value
-            //            nodeValue = nodeValue ?? cols[c].FirstChild?.Value;
-
-            //            if (string.IsNullOrEmpty(nodeValue)) continue;
-
-            //            Trace.WriteLine(nodeValue);
-            //            colList.Add(nodeValue);
-            //        }
-
-            //        if (colList.Count > 0)
-            //            ediSegment.Add(colList.ToArray());
-            //    }
-
-            //    segments[nv] = ediSegment;
-            //}
-
-            //return segments;
         }
 
         private EdiSegmentGroup ReadGroup(XmlNode node)
