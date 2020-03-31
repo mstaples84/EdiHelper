@@ -139,18 +139,21 @@ namespace EdiHelper
             if (!int.TryParse(groupString, out var groupInt)) throw new Exception($"Invalid group id attribute at {node.Name}");
 
             var segmentGroup = _reader.GetSegmentGroup(groupInt);
-
-            if (segmentGroup == null)
-                throw new Exception("Segment Group not found");
-
+            
             EdiBaseSegment[] children = null;
 
-            foreach (var group in segmentGroup)
+            if (segmentGroup == null)
+                children = ReadChildren(node.ChildNodes);
+            
+            else
             {
-                // get children (recursive)
-                children = ReadChildren(node.ChildNodes, group);
+                foreach (var group in segmentGroup) {
+                    // Childrens will be overwritten. Need to be fixed
+                    // get children (recursive)
+                    children = ReadChildren(node.ChildNodes, group);
+                }
             }
-
+            
             if (children == null) return null;
 
             // create group entity
