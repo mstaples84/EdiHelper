@@ -143,15 +143,21 @@ namespace EdiHelper
             EdiBaseSegment[] children = null;
 
             if (segmentGroup == null)
+            {
                 children = ReadChildren(node.ChildNodes);
-            
+            }
             else
             {
-                foreach (var group in segmentGroup) {
-                    // Childrens will be overwritten. Need to be fixed
+                var childrenList = new SortedList<int, EdiBaseSegment[]>();
+
+                for (var i = 0; i < segmentGroup.Length; i++)
+                {
                     // get children (recursive)
-                    children = ReadChildren(node.ChildNodes, group);
+                    children = ReadChildren(node.ChildNodes, segmentGroup[i]);
+                    childrenList.Add(i, children);
                 }
+
+                children = childrenList.SelectMany(c => c.Value).ToArray();
             }
             
             if (children == null) return null;
